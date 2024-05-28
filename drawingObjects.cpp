@@ -1,16 +1,27 @@
 #include "drawingObjects.h"
 #include <math.h>
 
+//internal helper function, returns square of euclid distance between points
+static double distance(double x1, double y1, double x2, double y2) {
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    return (dx * dx) + (dy * dy);
+}
+
 int Drawable::getState() {
     return state;
 }
 
 int Circle::onClick(double x, double y) {
-    //TODO -- process clicks, delete clicked on things
-    //if (x, y) within radius of center
-    //  set state to expired
-    //  free vertices
-    //  return 1
+    if(distance(x, y, center[0], center[1]) < radiusSquared) {
+        //click was on this circle -- if shift pressed, delete circle
+        if(SDL_GetModState() & KMOD_SHIFT) {
+            state = DRAWABLE_EXPIRED;
+            free(vertices);
+            numVertices = 0;
+        }
+        return 1;
+    }
     return 0;
 }
 
@@ -27,6 +38,7 @@ void Circle::draw() {
 
 Circle::Circle(double r, double x, double y, double red, double grn, double blu) {
     radius = r;
+    radiusSquared = r * r;
     center[0] = x;
     center[1] = y;
     color[0] = red;

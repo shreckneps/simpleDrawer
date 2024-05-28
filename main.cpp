@@ -190,13 +190,20 @@ int checkPainting(SDL_Event e) {
         //sdl measurements are top-down, using bottom-up with opengl
         double y = height - e.button.y;
         screenToWorld(&x, &y);
-
-        //TODO -- process clicks on objects
-        //call onClick on everything in objects, until one of them returns nonzero
-        //if one returns nonzero
-        //  don't add a new circle
-        //  check if that object is now expired -- if so, remove it
-
+        
+        int i;
+        for(i = 0; i < objects.size(); i++) {
+            if(objects[i]->onClick(x, y)) {
+                if(objects[i]->getState() == DRAWABLE_EXPIRED) {
+                    //order of objects need not be preserved
+                    //accelerate removal via pulling the last thing to the should-be-empty spot
+                    objects[i] = objects.back();
+                    objects.pop_back();
+                }
+                return 1;
+            }
+        }
+        
         objects.push_back(new Circle(0.25, x, y, 0, 0.5, 0));
         return 1;
     }
